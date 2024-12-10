@@ -6,6 +6,7 @@
 
 # This file contains common functions that
 # are being used by our metrics and integration tests
+set -x
 
 this_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export repo_root_dir="$(cd "${this_script_dir}/../" && pwd)"
@@ -628,10 +629,11 @@ function install_cri_containerd() {
 	project="containerd/containerd"
 	version=$(get_latest_patch_release_from_a_github_project "${project}" "${base_version}")
 
-	tarball_name="cri-containerd-cni-${version//v}-linux-$(${repo_root_dir}/tests/kata-arch.sh -g).tar.gz"
+	tarball_name="containerd-${version//v}-linux-$(${repo_root_dir}/tests/kata-arch.sh -g).tar.gz"
 
 	download_github_project_tarball "${project}" "${version}" "${tarball_name}"
 	sudo tar -xvf "${tarball_name}" -C /
+
 	rm -f "${tarball_name}"
 
 	sudo mkdir -p /etc/containerd
@@ -835,6 +837,11 @@ function get_test_version(){
 
 # Load vhost, vhost_net, vhost_vsock modules.
 function load_vhost_mods() {
+	mod=`ls /usr/sbin/`
+	info "sbindir=$mod"
+	env=`env`
+	info "env=$env"
+
 	sudo modprobe vhost
 	sudo modprobe vhost_net
 	sudo modprobe vhost_vsock
